@@ -117,3 +117,36 @@ func DeletePersonEndPoint(w http.ResponseWriter, r *http.Request) {
 	}
 	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
 }
+
+// GET parents by person ID
+func FindParentsEndPoint(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	parents, err := dao.FindParents(params["id"])
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, parents)
+}
+
+// GET children by person ID
+func FindChildrenEndPoint(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	parents, err := dao.FindChildren(params["id"])
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, parents)
+}
+
+// PATCH child and parent to relate one each other
+func RelateParentToChildEndPoint(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	params := mux.Vars(r)
+	if err := dao.RelateChildToParent(params["parent_id"], params["child_id"]); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
+}
