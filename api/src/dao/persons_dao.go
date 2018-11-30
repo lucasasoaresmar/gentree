@@ -21,19 +21,6 @@ const (
 	COLLECTION = "persons"
 )
 
-/*
-	Helper functions
-*/
-// Check if id is in a slice
-func contains(s []bson.ObjectId, e bson.ObjectId) bool {
-  for _, a := range s {
-      if a == e {
-          return true
-      }
-  }
-  return false
-}
-
 // Establish a connection to database
 func (m *PersonsDAO) Connect() {
 	session, err := mgo.Dial(m.Server)
