@@ -75,25 +75,25 @@ order | Order of person in genealogical tree starting from 1 (last descendants).
 Exemple:
 ```
 [
-{
-"id": "5c00aa4b62496c0007eb7f45",
-"name": "Jr",
-"order": 3,
-"parents": [
-"5c00c7204bb9b20007f9c79d",
-"5c00d04e01a9860006fe02e9"
-]
-},
-{
-"id": "5c00c7204bb9b20007f9c79d",
-"name": "Maria",
-"order": 4
-},
-{
-"id": "5c00d04e01a9860006fe02e9",
-"name": "Mario",
-"order": 4
-}
+	{
+		"id": "5c00aa4b62496c0007eb7f45",
+		"name": "Jr",
+		"order": 3,
+		"parents": [
+			"5c00c7204bb9b20007f9c79d",
+			"5c00d04e01a9860006fe02e9"
+		]
+	},
+	{
+		"id": "5c00c7204bb9b20007f9c79d",
+		"name": "Maria",
+		"order": 4
+	},
+	{
+		"id": "5c00d04e01a9860006fe02e9",
+		"name": "Mario",
+		"order": 4
+	}
 ]
 ```
 
