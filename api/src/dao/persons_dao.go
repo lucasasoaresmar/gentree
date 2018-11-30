@@ -174,3 +174,39 @@ func (m *PersonsDAO) RelateChildToParent(parentId string, childId string) error 
 	err = m.Order()
 	return err
 }
+
+// Find relatives of a person if they have order equal or greater than entry order
+func (m *PersonsDAO) FindRelativesWithOrderGreaterThan(id string, order int) ([]Person, error) {
+	var relatives, parents, children []Person
+	err := db.C(COLLECTION).Find(bson.M{"children": bson.M{"$in": []bson.ObjectId{bson.ObjectIdHex(id)}}, "order": bson.M{"$gte": order}}).All(&parents)
+	err = db.C(COLLECTION).Find(bson.M{"parents": bson.M{"$in": []bson.ObjectId{bson.ObjectIdHex(id)}}, "order": bson.M{"$gte": order}}).All(&children)
+	if err != nil {
+		return nil, err
+	}
+	relatives = append(relatives, parents...)
+	relatives = append(relatives, children...)
+	return relatives, nil	
+}
+
+// Find genealogical tree of Person
+func (m *PersonsDAO) GenTree(id string) ([]Person, error) {
+	var personsIHave, personsINeed []Person
+	target, err := m.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+	order := target.Order
+	personsINeed = append(personsINeed, target)
+	for len(personsIHave) < len(personsINeed) {
+		diff := diff(personsIHave, personsINeed)
+		personsIHave = personsINeed
+		for _, target := range diff {
+			relatives, err := m.FindRelativesWithOrderGreaterThan(target.ID.Hex(), order)
+			if err != nil {
+				return nil, err
+			}
+			personsINeed = appendUnique(relatives, personsINeed)
+		}
+	}
+	return personsINeed, nil
+}

@@ -150,3 +150,14 @@ func RelateParentToChildEndPoint(w http.ResponseWriter, r *http.Request) {
 	}
 	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
 }
+
+// GET genealogical tree of a Person
+func TreeEndPoint(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	tree, err := dao.GenTree(params["id"])
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, tree)
+}
