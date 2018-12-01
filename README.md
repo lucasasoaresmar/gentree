@@ -10,17 +10,15 @@ You can clone this project and deploy it using docker.
 
 * [Docker](https://www.docker.com/get-started) - Get started in docker
 
-##Install
+## Install
 
-After cloning the project, create a .env file in the root directory of the project and define SERVER and 
-DATABASE as bellow.
-
+After cloning the project, create a .env file in the root directory of the project and define SERVER and DATABASE as bellow.
 ```
 SERVER=mongo:27017
 DATABASE=persons_db
 ```
 
-If you change the server, remember to change it also in the docker-compose.yaml file.
+If you change the server, remember to change it in the docker-compose.yaml file.
 ```
 ...
   mongo:
@@ -34,7 +32,7 @@ In the root directory, build and start the image.
 ```
 $ docker-compose up -d --build
 ```
-Thats it!
+That's it!
 
 ## Usage
 
@@ -45,55 +43,55 @@ Field | Description
 **id** | The item's unique id.
 name | Person's name.
 parents | Person's parents.
-order | Order of person in genealogical tree starting from 1 (last descendants).
+order | Order of a person in genealogical tree starting from 1 (last descendants).
 
 ### Endpoits
 
-/persons
+`/persons`
 * GET - Get everyone
 * DELETE - Delete all Persons
 * POST - Add a Person
 
-/persons/{id}
+`/persons/{id}`
 * GET - Get a Person by its id
 * PUT - Update a Person
 * PATCH - Update a Person specific field
 * DELETE - Delete a Person by its id
 
-/persons/{id}/parents
+`/persons/{id}/parents`
 * GET - Get a Person's parents by id
 
-/persons/{id}/children
+`/persons/{id}/children`
 * GET - Get a Person's children by id
 
-/persons/{parent_id}/isparentof/{child_id}
+`/persons/{parent_id}/isparentof/{child_id}`
 * PATCH - Relate a parent to a child
 
-/persons/{id}/tree
+`/persons/{id}/tree`
 * GET - Get a Person's genealogical tree by its id
 
-Exemple:
+Example of `/persons/5c00aa4b62496c0007eb7f45/tree` response:
 ```
 [
-	{
-		"id": "5c00aa4b62496c0007eb7f45",
-		"name": "Jr",
-		"order": 3,
-		"parents": [
-			"5c00c7204bb9b20007f9c79d",
-			"5c00d04e01a9860006fe02e9"
-		]
-	},
-	{
-		"id": "5c00c7204bb9b20007f9c79d",
-		"name": "Maria",
-		"order": 4
-	},
-	{
-		"id": "5c00d04e01a9860006fe02e9",
-		"name": "Mario",
-		"order": 4
-	}
+  {
+    "id": "5c00aa4b62496c0007eb7f45",
+    "name": "Jr",
+    "order": 3,
+    "parents": [
+      "5c00c7204bb9b20007f9c79d",
+      "5c00d04e01a9860006fe02e9"
+    ]
+  },
+  {
+    "id": "5c00c7204bb9b20007f9c79d",
+    "name": "Maria",
+    "order": 4
+  },
+  {
+    "id": "5c00d04e01a9860006fe02e9",
+    "name": "Mario",
+    "order": 4
+  }
 ]
 ```
 
@@ -109,4 +107,4 @@ You can add as many Persons as you want with nothing but a name in the request a
 
 ## Versioning
 
-This project still in development
+This project is still in development
