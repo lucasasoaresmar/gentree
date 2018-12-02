@@ -160,7 +160,7 @@ func (m *PersonsDAO) RelateChildToParent(parentId string, childId string) error 
 		return err
 	}
 	//Need to improve - check if child is an ancestor
-	if parent.Order < child.Order && parent.Order != 0 {
+	if (parent.Order < child.Order) && (len(parent.Children) != 0 || len(parent.Parents) != 0) {
 		return errors.New("You just can't do that")
 	}
 	err = m.addChild(parentId, childId)
