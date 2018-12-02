@@ -33,3 +33,13 @@ func appendUnique(a []Person, b []Person) []Person {
 	difference := diff(a, b)
 	return append(a, difference...)
 }
+
+func removeId(slice []bson.ObjectId, id bson.ObjectId) []bson.ObjectId {
+	var newSlice []bson.ObjectId
+	for _, _id := range slice {
+		if _id != id {
+			newSlice = append(newSlice, _id)
+		}
+	}
+	return newSlice
+}

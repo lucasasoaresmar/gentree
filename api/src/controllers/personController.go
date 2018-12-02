@@ -151,6 +151,17 @@ func RelateParentToChildEndPoint(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
+// PATCH removerelation between child and parent
+func RemoveRelation(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	params := mux.Vars(r)
+	if err := dao.RemoveRelation(params["parent_id"], params["child_id"]); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
+}
+
 // GET genealogical tree of a Person
 func TreeEndPoint(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)

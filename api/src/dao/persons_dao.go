@@ -160,7 +160,7 @@ func (m *PersonsDAO) RelateChildToParent(parentId string, childId string) error 
 		return err
 	}
 	//Need to improve - check if child is an ancestor
-	if parent.Order < child.Order && parent.Order != 0 {
+	if (parent.Order < child.Order) && (len(parent.Children) != 0 || len(parent.Parents) != 0) {
 		return errors.New("You just can't do that")
 	}
 	err = m.addChild(parentId, childId)
@@ -173,6 +173,41 @@ func (m *PersonsDAO) RelateChildToParent(parentId string, childId string) error 
 	}
 	err = m.Order()
 	return err
+}
+
+// Remove Relation between a child and a parent
+func (m *PersonsDAO) RemoveRelation(parentId string, childId string) error {
+	if parentId == childId {
+		return errors.New("Same ids")
+	}
+	parent, err := m.FindById(parentId)
+	if err != nil {
+		return err
+	}
+	children := parent.Children
+	for _, _childId := range children {
+		child, err := m.FindById(_childId.Hex())
+		if err != nil {
+			return err
+		}
+		child.Parents = removeId(child.Parents, parent.ID)
+		if err := m.Update(_childId.Hex(), child); err != nil {
+			return err
+		}
+	}
+	var noIds []bson.ObjectId
+	parent.Children = noIds
+	if err = m.Update(parentId, parent); err != nil {
+		return err
+	}
+	for _, _childId := range children {
+		if _childId.Hex() != childId {
+			if err := m.RelateChildToParent(parentId, _childId.Hex()); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // Find relatives of a person if they have order equal or greater than entry order
