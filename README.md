@@ -67,6 +67,9 @@ order | Order of a person in genealogical tree starting from 1 (last descendants
 `/persons/{parent_id}/isparentof/{child_id}`
 * PATCH - Relate a parent to a child
 
+`/persons/{parent_id}/isnotparentof/{child_id}`
+* PATCH - Remove a relation between a parent and a child
+
 `/persons/{id}/tree`
 * GET - Get a Person's genealogical tree by its id
 
@@ -98,6 +101,8 @@ Example of `/persons/5c00aa4b62496c0007eb7f45/tree` response:
 ### Adding and relating Persons
 
 You can add as many Persons as you want with nothing but a name in the request and relate than with the `/persons/{parent_id}/isparentof/{child_id}` endpoint.
+
+If you want to remove a relation, use the `/persons/{parent_id}/isnotparentof/{child_id}` endpoint.
 
 ## Built With
 
