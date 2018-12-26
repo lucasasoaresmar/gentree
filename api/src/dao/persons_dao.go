@@ -40,7 +40,11 @@ func (m *PersonsDAO) FindAll() ([]Person, error) {
 // Find a person by its id
 func (m *PersonsDAO) FindById(id string) (Person, error) {
 	var person Person
-	err := db.C(COLLECTION).FindId(bson.ObjectIdHex(id)).One(&person)
+	_id , err := stringToObjectId(id);
+	if err != nil {
+		return person, err
+	}
+	err = db.C(COLLECTION).FindId(_id).One(&person)
 	return person, err
 }
 
@@ -52,7 +56,11 @@ func (m *PersonsDAO) Insert(person Person) error {
 
 // Delete a person by its id
 func (m *PersonsDAO) DeleteById(id string) error {
-	err := db.C(COLLECTION).RemoveId(bson.ObjectIdHex(id))
+	_id , err := stringToObjectId(id);
+	if err != nil {
+		return err
+	}
+	err = db.C(COLLECTION).RemoveId(_id)
 	return err
 }
 
@@ -64,21 +72,33 @@ func (m *PersonsDAO) DeleteAll() error {
 
 // Update a person by its id
 func (m *PersonsDAO) Update(id string, person Person) error {
-	err := db.C(COLLECTION).UpdateId(bson.ObjectIdHex(id), &person)
+	_id , err := stringToObjectId(id);
+	if err != nil {
+		return err
+	}
+	err = db.C(COLLECTION).UpdateId(_id, &person)
 	return err
 }
 
 // Find parents
 func (m *PersonsDAO) FindParents(childId string) ([]Person, error) {
 	var parents []Person
-	err := db.C(COLLECTION).Find(bson.M{"children": bson.M{"$in": []bson.ObjectId{bson.ObjectIdHex(childId)}}}).All(&parents)
+	_childId , err := stringToObjectId(childId);
+	if err != nil {
+		return parents, err
+	}
+	err = db.C(COLLECTION).Find(bson.M{"children": bson.M{"$in": []bson.ObjectId{_childId}}}).All(&parents)
 	return parents, err
 }
 
 // Find children
 func (m *PersonsDAO) FindChildren(parentId string) ([]Person, error) {
 	var children []Person
-	err := db.C(COLLECTION).Find(bson.M{"parents": bson.M{"$in": []bson.ObjectId{bson.ObjectIdHex(parentId)}}}).All(&children)
+	_parentId , err := stringToObjectId(parentId);
+	if err != nil {
+		return children, err
+	}
+	err = db.C(COLLECTION).Find(bson.M{"parents": bson.M{"$in": []bson.ObjectId{_parentId}}}).All(&children)
 	return children, err
 }
 
@@ -86,12 +106,10 @@ func (m *PersonsDAO) FindChildren(parentId string) ([]Person, error) {
 func (m *PersonsDAO) Order() error {
 	var lasts []Person
 	order := 1
-
 	err := db.C(COLLECTION).Find(bson.M{"children": bson.M{"$size":0}}).All(&lasts)
 	if err != nil {
 		return err
 	}
-
 	for len(lasts) > 0 || lasts != nil {
 		var tempLasts []Person
 		for _, last := range lasts {
@@ -122,7 +140,10 @@ func (m *PersonsDAO) addChild (parentId string, childId string) error {
 	if err != nil { 
 		return err
 	}
-	_childId := bson.ObjectIdHex(childId)
+	_childId, err := stringToObjectId(childId);
+	if err != nil {
+		return err
+	}
 	if contains(parent.Children, _childId) { 
 		return errors.New("This relation already exists")
 	}
@@ -137,7 +158,10 @@ func (m *PersonsDAO) addParent (childId string, parentId string) error {
 	if err != nil {
 		return err
 	}
-	_parentId := bson.ObjectIdHex(parentId)
+	_parentId, err := stringToObjectId(parentId);
+	if err != nil {
+		return err
+	}
 	if contains(child.Parents, _parentId) { 
 		return errors.New("This relation already exists")
 	}
@@ -213,8 +237,12 @@ func (m *PersonsDAO) RemoveRelation(parentId string, childId string) error {
 // Find relatives of a person if they have order equal or greater than entry order
 func (m *PersonsDAO) FindRelativesWithOrderGreaterThan(id string, order int) ([]Person, error) {
 	var relatives, parents, children []Person
-	err := db.C(COLLECTION).Find(bson.M{"children": bson.M{"$in": []bson.ObjectId{bson.ObjectIdHex(id)}}, "order": bson.M{"$gte": order}}).All(&parents)
-	err = db.C(COLLECTION).Find(bson.M{"parents": bson.M{"$in": []bson.ObjectId{bson.ObjectIdHex(id)}}, "order": bson.M{"$gte": order}}).All(&children)
+	_id, err := stringToObjectId(id);
+	if err != nil {
+		return relatives, err
+	}
+	err = db.C(COLLECTION).Find(bson.M{"children": bson.M{"$in": []bson.ObjectId{_id}}, "order": bson.M{"$gte": order}}).All(&parents)
+	err = db.C(COLLECTION).Find(bson.M{"parents": bson.M{"$in": []bson.ObjectId{_id}}, "order": bson.M{"$gte": order}}).All(&children)
 	if err != nil {
 		return nil, err
 	}

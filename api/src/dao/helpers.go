@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"errors"
+	
 	"gopkg.in/mgo.v2/bson"
 
 	. "app/models"
@@ -42,4 +44,12 @@ func removeId(slice []bson.ObjectId, id bson.ObjectId) []bson.ObjectId {
 		}
 	}
 	return newSlice
+}
+
+func stringToObjectId(id string) (bson.ObjectId, error) {
+	if bson.IsObjectIdHex(id) {
+		return bson.ObjectIdHex(id), nil	
+	}
+
+	return "", errors.New("This id is not a valid hex representation of an ObjectId")
 }
