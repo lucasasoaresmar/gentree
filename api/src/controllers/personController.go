@@ -86,11 +86,16 @@ func UpdateValueOfPersonEndPoint(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid Person ID")
 		return
 	}
-	if err := json.NewDecoder(r.Body).Decode(&person); err != nil {
+	var updatedPerson Person
+	if err := json.NewDecoder(r.Body).Decode(&updatedPerson); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
-	if err := dao.Update(params["id"], person); err != nil {
+	if updatedPerson.Order != person.Order {
+		respondWithError(w, http.StatusBadRequest, "It's not possible to change the Order")
+		return
+	}
+	if err := dao.Update(params["id"], updatedPerson); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
