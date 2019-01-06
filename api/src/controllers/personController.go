@@ -13,15 +13,29 @@ import (
 
 var dao = PersonsDAO{}
 
-func respondWithError(w http.ResponseWriter, code int, msg string) {
-	respondWithJson(w, code, map[string]string{"error": msg})
-}
-
 func respondWithJson(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
+}
+
+func respondWithError(w http.ResponseWriter, code int, errorMessage string) {
+	errorResponse := struct {
+		ErrorMessage string
+	}{
+		errorMessage,
+	}
+	respondWithJson(w, code, errorResponse)
+}
+
+func respondWithSuccess(w http.ResponseWriter) {
+	successResponse := struct {
+		Result string
+	}{
+		Result: "success",
+	}
+	respondWithJson(w, http.StatusOK, successResponse)
 }
 
 // GET list of persons
@@ -74,7 +88,7 @@ func UpdatePersonEndPoint(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
+	respondWithSuccess(w)
 }
 
 // PATCH update a person by id
@@ -99,7 +113,7 @@ func UpdateValueOfPersonEndPoint(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
+	respondWithSuccess(w)
 }
 
 //DELETE all persons
@@ -109,7 +123,7 @@ func DeleteAllEndPoint(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
+	respondWithSuccess(w)
 }
 
 // DELETE a person
@@ -120,7 +134,7 @@ func DeletePersonEndPoint(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
+	respondWithSuccess(w)
 }
 
 // GET parents by person ID
@@ -153,7 +167,7 @@ func RelateParentToChildEndPoint(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
+	respondWithSuccess(w)
 }
 
 // PATCH removerelation between child and parent
@@ -164,7 +178,7 @@ func RemoveRelation(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJson(w, http.StatusOK, map[string]string{"result": "success"})
+	respondWithSuccess(w)
 }
 
 // GET genealogical tree of a Person
