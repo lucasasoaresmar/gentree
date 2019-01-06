@@ -6,6 +6,7 @@ import (
 
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	txn "gopkg.in/mgo.v2/txn"
 	
 	. "app/models"
 )
@@ -33,7 +34,7 @@ func (m *PersonsDAO) Connect() {
 // Find list of persons
 func (m *PersonsDAO) FindAll() ([]Person, error) {
 	var persons []Person
-	err := db.C(COLLECTION).Find(bson.M{}).All(&persons)
+	err := db.C(COLLECTION).Find(bson.M{"name": bson.M{"$exists": true	}}).All(&persons)
 	return persons, err
 }
 
@@ -201,35 +202,28 @@ func (m *PersonsDAO) RelateChildToParent(parentId string, childId string) error 
 
 // Remove Relation between a child and a parent
 func (m *PersonsDAO) RemoveRelation(parentId string, childId string) error {
-	if parentId == childId {
-		return errors.New("Same ids")
-	}
-	parent, err := m.FindById(parentId)
+		_childId, err := stringToObjectId(childId);
 	if err != nil {
 		return err
 	}
-	children := parent.Children
-	for _, _childId := range children {
-		child, err := m.FindById(_childId.Hex())
-		if err != nil {
-			return err
-		}
-		child.Parents = removeId(child.Parents, parent.ID)
-		if err := m.Update(_childId.Hex(), child); err != nil {
-			return err
-		}
-	}
-	var noIds []bson.ObjectId
-	parent.Children = noIds
-	if err = m.Update(parentId, parent); err != nil {
+	_parentId, err := stringToObjectId(parentId);
+	if err != nil {
 		return err
 	}
-	for _, _childId := range children {
-		if _childId.Hex() != childId {
-			if err := m.RelateChildToParent(parentId, _childId.Hex()); err != nil {
-				return err
-			}
-		}
+	runner := txn.NewRunner(db.C(COLLECTION))
+	ops := []txn.Op{{
+		C:      COLLECTION, 
+		Id:     _parentId,
+		Update: bson.M{"$pull": bson.M{"children": _childId}},
+	}, {
+		C:      COLLECTION,
+		Id:     _childId,
+		Update: bson.M{"$pull": bson.M{"parents": _parentId}},
+		}}
+	id := bson.NewObjectId() // Optional
+	err = runner.Run(ops, id, nil)
+	if err != nil {
+		return err
 	}
 	return nil
 }
