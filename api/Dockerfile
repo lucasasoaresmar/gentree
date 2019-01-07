@@ -3,10 +3,9 @@ FROM golang:1.11.2
 ADD ./src /go/src/app
 WORKDIR /go/src/app
 
-RUN go get github.com/gorilla/mux
-RUN go get gopkg.in/mgo.v2/bson
-RUN go get gopkg.in/mgo.v2
-RUN go get gopkg.in/mgo.v2/txn
+RUN go get -u github.com/golang/dep/cmd/dep
+
+RUN dep ensure
 
 RUN go install app
 
