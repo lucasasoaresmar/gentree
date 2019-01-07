@@ -7,8 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 
-	. "app/dao"
 	. "app/controllers"
+	. "app/dao"
 )
 
 var dao = PersonsDAO{}
@@ -31,7 +31,7 @@ func main() {
 	r.HandleFunc("/persons/{id}/parents", FindParentsEndPoint).Methods("GET")
 	r.HandleFunc("/persons/{id}/children", FindChildrenEndPoint).Methods("GET")
 	r.HandleFunc("/persons/{parent_id}/isparentof/{child_id}", RelateParentToChildEndPoint).Methods("PATCH")
-	r.HandleFunc("/persons/{parent_id}/isnotparentof/{child_id}", RemoveRelation).Methods("PATCH")	
+	r.HandleFunc("/persons/{parent_id}/isnotparentof/{child_id}", RemoveRelation).Methods("PATCH")
 	r.HandleFunc("/persons/{id}/tree", TreeEndPoint).Methods("GET")
 	if err := http.ListenAndServe(":3000", r); err != nil {
 		log.Fatal(err)

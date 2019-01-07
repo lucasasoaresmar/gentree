@@ -2,19 +2,19 @@ package dao
 
 import (
 	"errors"
-	
+
 	"gopkg.in/mgo.v2/bson"
 
 	. "app/models"
 )
 
 func contains(s []bson.ObjectId, e bson.ObjectId) bool {
-  for _, a := range s {
-      if a == e {
-          return true
-      }
-  }
-  return false
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 func diff(a []Person, b []Person) []Person {
@@ -26,7 +26,9 @@ func diff(a []Person, b []Person) []Person {
 				equal = true
 			}
 		}
-		if !equal { difference = append(difference, _b) }
+		if !equal {
+			difference = append(difference, _b)
+		}
 	}
 	return difference
 }
@@ -48,7 +50,7 @@ func removeId(slice []bson.ObjectId, id bson.ObjectId) []bson.ObjectId {
 
 func stringToObjectId(id string) (bson.ObjectId, error) {
 	if bson.IsObjectIdHex(id) {
-		return bson.ObjectIdHex(id), nil	
+		return bson.ObjectIdHex(id), nil
 	}
 
 	return "", errors.New("This id is not a valid hex representation of an ObjectId")

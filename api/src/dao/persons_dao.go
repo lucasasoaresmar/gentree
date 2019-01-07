@@ -1,13 +1,13 @@
 package dao
 
 import (
-	"log"
 	"errors"
+	"log"
 
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	txn "gopkg.in/mgo.v2/txn"
-	
+
 	. "app/models"
 )
 
@@ -34,14 +34,14 @@ func (m *PersonsDAO) Connect() {
 // Find list of persons
 func (m *PersonsDAO) FindAll() ([]Person, error) {
 	var persons []Person
-	err := db.C(COLLECTION).Find(bson.M{"name": bson.M{"$exists": true	}}).All(&persons)
+	err := db.C(COLLECTION).Find(bson.M{"name": bson.M{"$exists": true}}).All(&persons)
 	return persons, err
 }
 
 // Find a person by its id
 func (m *PersonsDAO) FindById(id string) (Person, error) {
 	var person Person
-	_id , err := stringToObjectId(id);
+	_id, err := stringToObjectId(id)
 	if err != nil {
 		return person, err
 	}
@@ -57,7 +57,7 @@ func (m *PersonsDAO) Insert(person Person) error {
 
 // Delete a person by its id
 func (m *PersonsDAO) DeleteById(id string) error {
-	_id , err := stringToObjectId(id);
+	_id, err := stringToObjectId(id)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (m *PersonsDAO) DeleteAll() error {
 
 // Update a person by its id
 func (m *PersonsDAO) Update(id string, person Person) error {
-	_id , err := stringToObjectId(id);
+	_id, err := stringToObjectId(id)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func (m *PersonsDAO) Update(id string, person Person) error {
 // Find parents
 func (m *PersonsDAO) FindParents(childId string) ([]Person, error) {
 	var parents []Person
-	_childId , err := stringToObjectId(childId);
+	_childId, err := stringToObjectId(childId)
 	if err != nil {
 		return parents, err
 	}
@@ -95,7 +95,7 @@ func (m *PersonsDAO) FindParents(childId string) ([]Person, error) {
 // Find children
 func (m *PersonsDAO) FindChildren(parentId string) ([]Person, error) {
 	var children []Person
-	_parentId , err := stringToObjectId(parentId);
+	_parentId, err := stringToObjectId(parentId)
 	if err != nil {
 		return children, err
 	}
@@ -107,7 +107,7 @@ func (m *PersonsDAO) FindChildren(parentId string) ([]Person, error) {
 func (m *PersonsDAO) Order() error {
 	var lasts []Person
 	order := 1
-	err := db.C(COLLECTION).Find(bson.M{"children": bson.M{"$size":0}}).All(&lasts)
+	err := db.C(COLLECTION).Find(bson.M{"children": bson.M{"$size": 0}}).All(&lasts)
 	if err != nil {
 		return err
 	}
@@ -135,17 +135,17 @@ func (m *PersonsDAO) Order() error {
 }
 
 // Add a child to a Person
-func (m *PersonsDAO) addChild (parentId string, childId string) error {
+func (m *PersonsDAO) addChild(parentId string, childId string) error {
 	var parent Person
 	parent, err := m.FindById(parentId)
-	if err != nil { 
-		return err
-	}
-	_childId, err := stringToObjectId(childId);
 	if err != nil {
 		return err
 	}
-	if contains(parent.Children, _childId) { 
+	_childId, err := stringToObjectId(childId)
+	if err != nil {
+		return err
+	}
+	if contains(parent.Children, _childId) {
 		return errors.New("This relation already exists")
 	}
 	parent.Children = append(parent.Children, _childId)
@@ -154,16 +154,16 @@ func (m *PersonsDAO) addChild (parentId string, childId string) error {
 }
 
 // Add a father to a Person
-func (m *PersonsDAO) addParent (childId string, parentId string) error {
+func (m *PersonsDAO) addParent(childId string, parentId string) error {
 	child, err := m.FindById(childId)
 	if err != nil {
 		return err
 	}
-	_parentId, err := stringToObjectId(parentId);
+	_parentId, err := stringToObjectId(parentId)
 	if err != nil {
 		return err
 	}
-	if contains(child.Parents, _parentId) { 
+	if contains(child.Parents, _parentId) {
 		return errors.New("This relation already exists")
 	}
 	child.Parents = append(child.Parents, _parentId)
@@ -189,11 +189,11 @@ func (m *PersonsDAO) RelateChildToParent(parentId string, childId string) error 
 		return errors.New("You just can't do that")
 	}
 	err = m.addChild(parentId, childId)
-	if err != nil { 
+	if err != nil {
 		return err
 	}
 	err = m.addParent(childId, parentId)
-	if err != nil { 
+	if err != nil {
 		return err
 	}
 	err = m.Order()
@@ -202,24 +202,24 @@ func (m *PersonsDAO) RelateChildToParent(parentId string, childId string) error 
 
 // Remove Relation between a child and a parent
 func (m *PersonsDAO) RemoveRelation(parentId string, childId string) error {
-		_childId, err := stringToObjectId(childId);
+	_childId, err := stringToObjectId(childId)
 	if err != nil {
 		return err
 	}
-	_parentId, err := stringToObjectId(parentId);
+	_parentId, err := stringToObjectId(parentId)
 	if err != nil {
 		return err
 	}
 	runner := txn.NewRunner(db.C(COLLECTION))
 	ops := []txn.Op{{
-		C:      COLLECTION, 
+		C:      COLLECTION,
 		Id:     _parentId,
 		Update: bson.M{"$pull": bson.M{"children": _childId}},
 	}, {
 		C:      COLLECTION,
 		Id:     _childId,
 		Update: bson.M{"$pull": bson.M{"parents": _parentId}},
-		}}
+	}}
 	id := bson.NewObjectId() // Optional
 	err = runner.Run(ops, id, nil)
 	if err != nil {
@@ -231,7 +231,7 @@ func (m *PersonsDAO) RemoveRelation(parentId string, childId string) error {
 // Find relatives of a person if they have order equal or greater than entry order
 func (m *PersonsDAO) FindRelativesWithOrderGreaterThan(id string, order int) ([]Person, error) {
 	var relatives, parents, children []Person
-	_id, err := stringToObjectId(id);
+	_id, err := stringToObjectId(id)
 	if err != nil {
 		return relatives, err
 	}
@@ -242,7 +242,7 @@ func (m *PersonsDAO) FindRelativesWithOrderGreaterThan(id string, order int) ([]
 	}
 	relatives = append(relatives, parents...)
 	relatives = append(relatives, children...)
-	return relatives, nil	
+	return relatives, nil
 }
 
 // Find genealogical tree of Person
