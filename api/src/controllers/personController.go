@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gopkg.in/mgo.v2/bson"
 	"github.com/gorilla/mux"
+	"gopkg.in/mgo.v2/bson"
 
 	. "app/dao"
 	. "app/models"
